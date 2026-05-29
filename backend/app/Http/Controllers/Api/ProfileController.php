@@ -7,15 +7,24 @@ use App\Http\Requests\StoreProfileRequest;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Models\Profile;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ProfileController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $profiles = Profile::orderBy('name')->get();
+        $query = Profile::orderBy('id');
+
+        if ($request->boolean('with_trashed')) {
+            $query->withTrashed();
+        }
+
+        if ($request->boolean('only_trashed')) {
+            $query->onlyTrashed();
+        }
 
         return response()->json([
-            'data' => $profiles,
+            'data' => $query->get(),
         ]);
     }
 

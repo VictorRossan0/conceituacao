@@ -8,17 +8,24 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $users = User::with('profiles')
-            ->orderBy('name')
-            ->get();
+        $query = User::with('profiles')->orderBy('id');
+
+        if ($request->boolean('with_trashed')) {
+            $query->withTrashed();
+        }
+
+        if ($request->boolean('only_trashed')) {
+            $query->onlyTrashed();
+        }
 
         return response()->json([
-            'data' => $users,
+            'data' => $query->get(),
         ]);
     }
 
