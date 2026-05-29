@@ -9,8 +9,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Handles API authentication flows.
+ *
+ * This controller is responsible for user registration, login, authenticated
+ * user retrieval and logout using Laravel Sanctum personal access tokens.
+ */
 class AuthController extends Controller
 {
+    /**
+     * Registers a new user and returns an API access token.
+     *
+     * The created user does not receive an administrator profile by default.
+     * Administrator access is assigned through the profile relationship.
+     */
     public function register(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -34,6 +46,11 @@ class AuthController extends Controller
         ], 201);
     }
 
+    /**
+     * Authenticates a user and returns a Sanctum API access token.
+     *
+     * @throws ValidationException When the provided credentials are invalid.
+     */
     public function login(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -58,6 +75,9 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Returns the authenticated user with assigned profiles.
+     */
     public function me(Request $request): JsonResponse
     {
         return response()->json([
@@ -65,6 +85,9 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Revokes the current access token used by the authenticated user.
+     */
     public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();

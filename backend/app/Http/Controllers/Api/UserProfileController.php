@@ -8,8 +8,17 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * Handles user-profile association operations.
+ *
+ * This controller manages the many-to-many relationship between users and
+ * profiles. These routes are restricted to administrator users.
+ */
 class UserProfileController extends Controller
 {
+    /**
+     * Lists all active profiles assigned to a user.
+     */
     public function index(User $user): JsonResponse
     {
         return response()->json([
@@ -17,6 +26,12 @@ class UserProfileController extends Controller
         ]);
     }
 
+    /**
+     * Associates an active profile with a user.
+     *
+     * Soft-deleted profiles are ignored because the Profile query respects
+     * Laravel SoftDeletes by default.
+     */
     public function attach(Request $request, User $user): JsonResponse
     {
         $validated = $request->validate([
@@ -41,6 +56,12 @@ class UserProfileController extends Controller
         ]);
     }
 
+    /**
+     * Removes the association between a user and a profile.
+     *
+     * The profile itself is not deleted. Only the pivot table relationship is
+     * removed.
+     */
     public function detach(User $user, Profile $profile): JsonResponse
     {
         $user->profiles()->detach($profile->id);

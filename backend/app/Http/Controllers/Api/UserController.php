@@ -7,11 +7,24 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
+/**
+ * Handles user management API operations.
+ *
+ * This controller exposes CRUD operations for users and supports optional
+ * soft delete filters in the listing endpoint.
+ */
 class UserController extends Controller
 {
+    /**
+     * Lists users with optional soft delete filters.
+     *
+     * Supported query parameters:
+     * - with_trashed=true: returns active and soft-deleted users.
+     * - only_trashed=true: returns only soft-deleted users.
+     */
     public function index(Request $request): JsonResponse
     {
         $query = User::with('profiles')->orderBy('id');
@@ -29,6 +42,12 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * Creates a new user.
+     *
+     * The password is hashed before persistence and the created user is
+     * returned with its profile relationships loaded.
+     */
     public function store(StoreUserRequest $request): JsonResponse
     {
         $validated = $request->validated();
@@ -45,6 +64,9 @@ class UserController extends Controller
         ], 201);
     }
 
+    /**
+     * Displays a specific active user with assigned profiles.
+     */
     public function show(User $user): JsonResponse
     {
         return response()->json([
@@ -52,6 +74,11 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * Updates an existing user.
+     *
+     * Password update is optional. When omitted, the current password is kept.
+     */
     public function update(UpdateUserRequest $request, User $user): JsonResponse
     {
         $validated = $request->validated();
@@ -71,6 +98,12 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * Soft deletes a user.
+     *
+     * The record is not physically removed from the database because the User
+     * model uses Laravel SoftDeletes.
+     */
     public function destroy(User $user): JsonResponse
     {
         $user->delete();

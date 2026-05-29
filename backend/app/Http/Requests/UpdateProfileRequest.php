@@ -2,14 +2,19 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
+/**
+ * Validates data required to update a profile.
+ *
+ * This request keeps profile update validation centralized and preserves
+ * profile name uniqueness while ignoring the current profile record.
+ */
 class UpdateProfileRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Allows authenticated administrator requests to use this validation class.
      */
     public function authorize(): bool
     {
@@ -17,9 +22,9 @@ class UpdateProfileRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Returns validation rules for updating profiles.
      *
-     * @return array<string, ValidationRule|array<mixed>|string>
+     * @return array<string, mixed>
      */
     public function rules(): array
     {
@@ -35,6 +40,11 @@ class UpdateProfileRequest extends FormRequest
         ];
     }
 
+    /**
+     * Returns custom validation messages for profile updates.
+     *
+     * @return array<string, string>
+     */
     public function messages(): array
     {
         return [

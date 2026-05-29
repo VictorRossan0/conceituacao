@@ -2,13 +2,18 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Validates data required to create a user.
+ *
+ * This request centralizes user creation rules, ensuring that name, email
+ * and password are provided before the controller persists a new user.
+ */
 class StoreUserRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Allows authenticated requests to use this validation class.
      */
     public function authorize(): bool
     {
@@ -16,9 +21,9 @@ class StoreUserRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Returns validation rules for creating users.
      *
-     * @return array<string, ValidationRule|array<mixed>|string>
+     * @return array<string, mixed>
      */
     public function rules(): array
     {

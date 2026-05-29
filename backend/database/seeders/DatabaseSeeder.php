@@ -2,14 +2,21 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
+/**
+ * Main database seeder.
+ *
+ * This class orchestrates the initial database seed process required for
+ * local development and test validation.
+ */
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Seed the application's database.
+     * Runs the application seeders in the required order.
+     *
+     * Profiles are seeded before users because the default administrator user
+     * must be associated with the Administrador profile.
      */
     public function run(): void
     {

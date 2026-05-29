@@ -2,14 +2,19 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
+/**
+ * Validates data required to update a user.
+ *
+ * This request keeps user update validation outside the controller and
+ * preserves email uniqueness while ignoring the current user record.
+ */
 class UpdateUserRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Allows authenticated requests to use this validation class.
      */
     public function authorize(): bool
     {
@@ -17,9 +22,12 @@ class UpdateUserRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Returns validation rules for updating users.
      *
-     * @return array<string, ValidationRule|array<mixed>|string>
+     * Password is optional during updates. When it is not provided, the
+     * current password remains unchanged.
+     *
+     * @return array<string, mixed>
      */
     public function rules(): array
     {
