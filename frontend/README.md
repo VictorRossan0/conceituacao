@@ -1,44 +1,103 @@
-# frontend
+# Frontend — Conceituação
 
-This template should help get you started developing with Vue 3 in Vite.
+Frontend da aplicação **Conceituação**, desenvolvido em Vue 3 para consumir a API Laravel do projeto.
 
-## Recommended IDE Setup
+A interface permite autenticação, visualização do dashboard e gerenciamento de usuários, perfis e associações entre usuários e perfis.
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Tecnologias
 
-## Recommended Browser Setup
+* Vue 3
+* Vite
+* Vue Router
+* Axios
+* Bootstrap
+* Docker
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+## Principais recursos
 
-## Customize configuration
+* Tela de login
+* Armazenamento de token no `localStorage`
+* Consumo da API Laravel com Axios
+* Navbar reativa conforme autenticação
+* Dashboard com dados do usuário autenticado
+* Controle visual por perfil `Administrador`
+* Módulo de usuários
+* Módulo de perfis
+* Módulo de associação usuário-perfis
+* Exibição de registros ativos e excluídos logicamente via Soft Delete
+* Interface responsiva com Bootstrap
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+## Usuário padrão
 
-## Project Setup
+Após rodar o backend com migrations e seeders, é possível acessar o sistema com:
 
-```sh
+```text
+E-mail: admin@example.com
+Senha: password
+```
+
+## Execução via Docker
+
+Os comandos principais devem ser executados a partir da raiz do projeto, onde está localizado o `docker-compose.yml`.
+
+Subir os containers:
+
+```powershell
+docker compose up -d
+```
+
+Acessar a aplicação:
+
+```text
+http://localhost:5173
+```
+
+## Desenvolvimento local
+
+Instalar dependências:
+
+```powershell
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+Rodar o servidor de desenvolvimento:
 
-```sh
+```powershell
 npm run dev
 ```
 
-### Compile and Minify for Production
+Rodar lint:
 
-```sh
+```powershell
+npm run lint
+```
+
+Gerar build:
+
+```powershell
 npm run build
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+## Configuração da API
 
-```sh
-npm run lint
+O frontend consome a API Laravel usando a seguinte URL padrão:
+
+```text
+http://localhost:8000/api
 ```
+
+Essa configuração está centralizada em:
+
+```text
+src/api/api.js
+```
+
+Caso necessário, pode ser sobrescrita por variável de ambiente:
+
+```text
+VITE_API_URL
+```
+
+## Observação
+
+Este README descreve apenas o frontend. A documentação completa da entrega será concentrada no arquivo `README-novo.md`, localizado na raiz do projeto.
