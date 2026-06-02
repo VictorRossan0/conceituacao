@@ -1,0 +1,997 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Conceituação API",
+        "description": "Documentação da API REST do projeto Conceituação, responsável por autenticação, usuários, perfis e associações entre usuários e perfis.",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000/api",
+            "description": "Ambiente local via Docker"
+        }
+    ],
+    "paths": {
+        "/register": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Registrar usuário",
+                "description": "Cria um novo usuário e retorna um token de autenticação.",
+                "operationId": "e693dea5dcf1380041e25066f33b3b4c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Usuário Teste"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "usuario.teste@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Usuário registrado com sucesso.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Usuário registrado com sucesso."
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|example-token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erro de validação."
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login",
+                "description": "Autentica um usuário e retorna um token Bearer do Laravel Sanctum.",
+                "operationId": "ced2a5058dc4477012760c2d9091acad",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "admin@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login realizado com sucesso.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Login realizado com sucesso."
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|example-token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Credenciais inválidas."
+                    }
+                }
+            }
+        },
+        "/me": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Usuário autenticado",
+                "description": "Retorna os dados do usuário autenticado com seus perfis.",
+                "operationId": "8d4760013c8acdd880108bbf22ef8eda",
+                "responses": {
+                    "200": {
+                        "description": "Dados do usuário autenticado.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "user": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Logout",
+                "description": "Revoga o token atual do usuário autenticado.",
+                "operationId": "1ded7501c73b995e0a62a5340df419d4",
+                "responses": {
+                    "200": {
+                        "description": "Logout realizado com sucesso.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logout realizado com sucesso."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/profiles": {
+            "get": {
+                "tags": [
+                    "Profiles"
+                ],
+                "summary": "Listar perfis",
+                "description": "Lista perfis cadastrados. Suporta filtros opcionais para incluir registros excluídos via Soft Delete. Esta rota exige autenticação e perfil Administrador.",
+                "operationId": "db2c08fad4daa577038a8f1c36ecfd20",
+                "parameters": [
+                    {
+                        "name": "with_trashed",
+                        "in": "query",
+                        "description": "Quando true, retorna perfis ativos e excluídos logicamente.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "only_trashed",
+                        "in": "query",
+                        "description": "Quando true, retorna apenas perfis excluídos logicamente.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de perfis retornada com sucesso.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado."
+                    },
+                    "403": {
+                        "description": "Acesso permitido apenas para administradores."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Profiles"
+                ],
+                "summary": "Criar perfil",
+                "description": "Cria um novo perfil de acesso. Esta rota exige autenticação e perfil Administrador.",
+                "operationId": "3cd21470b16f75edd260e962b14a7dc4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Operador"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Perfil criado com sucesso.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Perfil criado com sucesso."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado."
+                    },
+                    "403": {
+                        "description": "Acesso permitido apenas para administradores."
+                    },
+                    "422": {
+                        "description": "Erro de validação."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/profiles/{profile}": {
+            "get": {
+                "tags": [
+                    "Profiles"
+                ],
+                "summary": "Visualizar perfil",
+                "description": "Retorna os dados de um perfil ativo específico. Esta rota exige autenticação e perfil Administrador.",
+                "operationId": "73d4d91accf51083e4c8e1a2fe1f6f96",
+                "parameters": [
+                    {
+                        "name": "profile",
+                        "in": "path",
+                        "description": "ID do perfil.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Perfil encontrado.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado."
+                    },
+                    "403": {
+                        "description": "Acesso permitido apenas para administradores."
+                    },
+                    "404": {
+                        "description": "Perfil não encontrado."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Profiles"
+                ],
+                "summary": "Atualizar perfil",
+                "description": "Atualiza os dados de um perfil existente. Esta rota exige autenticação e perfil Administrador.",
+                "operationId": "7aae66bad4028df4cbe81f325bb870e6",
+                "parameters": [
+                    {
+                        "name": "profile",
+                        "in": "path",
+                        "description": "ID do perfil.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Operador Atualizado"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Perfil atualizado com sucesso.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Perfil atualizado com sucesso."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado."
+                    },
+                    "403": {
+                        "description": "Acesso permitido apenas para administradores."
+                    },
+                    "404": {
+                        "description": "Perfil não encontrado."
+                    },
+                    "422": {
+                        "description": "Erro de validação."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Profiles"
+                ],
+                "summary": "Excluir perfil",
+                "description": "Exclui logicamente um perfil usando Soft Delete. Esta rota exige autenticação e perfil Administrador.",
+                "operationId": "4122e9e792e4a4b35c7fc2370f27986b",
+                "parameters": [
+                    {
+                        "name": "profile",
+                        "in": "path",
+                        "description": "ID do perfil.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Perfil excluído com sucesso.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Perfil excluído com sucesso."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado."
+                    },
+                    "403": {
+                        "description": "Acesso permitido apenas para administradores."
+                    },
+                    "404": {
+                        "description": "Perfil não encontrado."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/users/{user}/profiles": {
+            "get": {
+                "tags": [
+                    "User Profiles"
+                ],
+                "summary": "Listar perfis de um usuário",
+                "description": "Lista os perfis associados a um usuário específico. Esta rota exige autenticação e perfil Administrador.",
+                "operationId": "c1f7b6ccd15f803a90191b4a545c5496",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "ID do usuário.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Perfis do usuário retornados com sucesso.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado."
+                    },
+                    "403": {
+                        "description": "Acesso permitido apenas para administradores."
+                    },
+                    "404": {
+                        "description": "Usuário não encontrado."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "User Profiles"
+                ],
+                "summary": "Associar perfil ao usuário",
+                "description": "Associa um perfil ativo a um usuário específico. Esta rota exige autenticação e perfil Administrador.",
+                "operationId": "ea996cc66d2082965b3c409055303627",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "ID do usuário.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "profile_id"
+                                ],
+                                "properties": {
+                                    "profile_id": {
+                                        "description": "ID do perfil ativo que será associado ao usuário.",
+                                        "type": "integer",
+                                        "example": 2
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Perfil associado ao usuário com sucesso.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Perfil associado ao usuário com sucesso."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado."
+                    },
+                    "403": {
+                        "description": "Acesso permitido apenas para administradores."
+                    },
+                    "404": {
+                        "description": "Usuário, perfil não encontrado ou perfil excluído."
+                    },
+                    "422": {
+                        "description": "Erro de validação."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/users/{user}/profiles/{profile}": {
+            "delete": {
+                "tags": [
+                    "User Profiles"
+                ],
+                "summary": "Desassociar perfil do usuário",
+                "description": "Remove a associação entre um usuário e um perfil. O usuário e o perfil não são excluídos; apenas o vínculo na tabela pivot é removido. Esta rota exige autenticação e perfil Administrador.",
+                "operationId": "62e96fc2287b8ddb4278d77b1f926cc2",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "ID do usuário.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "profile",
+                        "in": "path",
+                        "description": "ID do perfil.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Perfil desassociado do usuário com sucesso.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Perfil desassociado do usuário com sucesso."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado."
+                    },
+                    "403": {
+                        "description": "Acesso permitido apenas para administradores."
+                    },
+                    "404": {
+                        "description": "Usuário ou perfil não encontrado."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/users": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Listar usuários",
+                "description": "Lista usuários cadastrados. Suporta filtros opcionais para incluir registros excluídos via Soft Delete.",
+                "operationId": "0d11901c0486c418ec57b99806ba0b92",
+                "parameters": [
+                    {
+                        "name": "with_trashed",
+                        "in": "query",
+                        "description": "Quando true, retorna usuários ativos e excluídos logicamente.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "only_trashed",
+                        "in": "query",
+                        "description": "Quando true, retorna apenas usuários excluídos logicamente.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de usuários retornada com sucesso.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Criar usuário",
+                "description": "Cria um novo usuário no sistema.",
+                "operationId": "1412e05bf4aa62d600b661626815f78e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "João Teste"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "joao.teste@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Usuário criado com sucesso."
+                    },
+                    "401": {
+                        "description": "Não autenticado."
+                    },
+                    "422": {
+                        "description": "Erro de validação."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/users/{user}": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Visualizar usuário",
+                "description": "Retorna os dados de um usuário ativo específico.",
+                "operationId": "6cd0b4f93123fa678ef0829c5a0cd60f",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "ID do usuário.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Usuário encontrado."
+                    },
+                    "401": {
+                        "description": "Não autenticado."
+                    },
+                    "404": {
+                        "description": "Usuário não encontrado."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Atualizar usuário",
+                "description": "Atualiza os dados de um usuário existente. A senha é opcional na atualização.",
+                "operationId": "6222cf01e76bce0c67ed64eef12a670b",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "ID do usuário.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "João Teste Atualizado"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "joao.teste@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Usuário atualizado com sucesso."
+                    },
+                    "401": {
+                        "description": "Não autenticado."
+                    },
+                    "404": {
+                        "description": "Usuário não encontrado."
+                    },
+                    "422": {
+                        "description": "Erro de validação."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Excluir usuário",
+                "description": "Exclui logicamente um usuário usando Soft Delete.",
+                "operationId": "42bae1f80097c599f5b60fcb53a36936",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "ID do usuário.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Usuário excluído com sucesso."
+                    },
+                    "401": {
+                        "description": "Não autenticado."
+                    },
+                    "404": {
+                        "description": "Usuário não encontrado."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "description": "Token Bearer gerado pelo Laravel Sanctum.",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Auth",
+            "description": "Auth"
+        },
+        {
+            "name": "Profiles",
+            "description": "Profiles"
+        },
+        {
+            "name": "User Profiles",
+            "description": "User Profiles"
+        },
+        {
+            "name": "Users",
+            "description": "Users"
+        }
+    ]
+}
